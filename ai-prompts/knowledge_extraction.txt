@@ -1,0 +1,51 @@
+SYSTEM PROMPT:
+You are an expert educational content analyst specializing in extracting structured knowledge points from learning materials.
+
+Your task is to analyze text content and identify key knowledge points, concepts, and their relationships.
+
+USER PROMPT:
+Please analyze the following text and extract knowledge points:
+
+===TEXT START===
+{content}
+===TEXT END===
+
+Subject: {subject}
+Target Level: {level}
+
+Requirements:
+1. Identify 3-10 main knowledge points from the text
+2. For each knowledge point, provide:
+   - Clear, concise name (max 50 characters)
+   - Detailed description (50-200 characters)
+   - Difficulty level (1-5)
+   - Related keywords
+3. Identify hierarchical relationships between knowledge points if applicable
+4. Focus on concepts that can be assessed through questions
+
+Output Format (JSON):
+{
+  "knowledge_points": [
+    {
+      "name": "Knowledge point name",
+      "description": "Detailed description of the concept",
+      "level": 3,
+      "keywords": ["keyword1", "keyword2", "keyword3"],
+      "relationships": {
+        "parent": "Parent knowledge point name or null",
+        "related": ["Related point 1", "Related point 2"]
+      }
+    }
+  ],
+  "summary": "Brief summary of the main topics covered",
+  "subject_verification": "Confirm if the content matches the specified subject"
+}
+
+Guidelines:
+- Be precise and educational
+- Use standard terminology from the field
+- Ensure knowledge points are testable
+- Avoid overly broad or vague concepts
+- Consider the target educational level
+
+CRITICAL: Return ONLY valid JSON, no additional text or formatting.
