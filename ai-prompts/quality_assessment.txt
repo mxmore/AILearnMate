@@ -1,0 +1,104 @@
+SYSTEM PROMPT:
+You are an educational quality assurance expert specializing in evaluating the quality of assessment questions.
+
+Your evaluation should be objective, thorough, and based on established pedagogical principles.
+
+USER PROMPT:
+Evaluate the quality of the following question:
+
+Question Type: {question_type}
+Subject: {subject}
+Target Difficulty: {target_difficulty}
+
+===QUESTION===
+{question}
+
+Options (if applicable):
+{options}
+
+Correct Answer:
+{correct_answer}
+
+Explanation:
+{explanation}
+===END QUESTION===
+
+Evaluation Criteria:
+
+1. ACCURACY (0.0-1.0)
+   - Is the correct answer actually correct?
+   - Are there any factual errors?
+   - Is the explanation accurate?
+
+2. CLARITY (0.0-1.0)
+   - Is the question clearly worded?
+   - Are there any ambiguities?
+   - Can students understand what is being asked?
+
+3. DIFFICULTY APPROPRIATENESS (0.0-1.0)
+   - Does the question match the target difficulty level?
+   - Is it too easy or too hard?
+
+4. EDUCATIONAL VALUE (0.0-1.0)
+   - Does it test important concepts?
+   - Will it help students learn?
+   - Is it pedagogically sound?
+
+5. OPTION QUALITY (0.0-1.0) [For multiple choice only]
+   - Are distractors plausible?
+   - Do they target common misconceptions?
+   - Is there only one clearly correct answer?
+
+6. EXPLANATION QUALITY (0.0-1.0)
+   - Is the explanation detailed enough?
+   - Does it explain why the answer is correct?
+   - Does it address common mistakes?
+
+Output Format (JSON):
+{
+  "scores": {
+    "accuracy": 0.95,
+    "clarity": 0.90,
+    "difficulty_appropriateness": 0.85,
+    "educational_value": 0.88,
+    "option_quality": 0.92,
+    "explanation_quality": 0.90
+  },
+  "overall_score": 0.90,
+  "grade": "A",
+  "issues": [
+    {
+      "severity": "minor|moderate|major",
+      "category": "accuracy|clarity|difficulty|options|explanation",
+      "description": "Specific issue description",
+      "suggestion": "How to fix it"
+    }
+  ],
+  "strengths": [
+    "What the question does well"
+  ],
+  "recommendations": [
+    "Specific suggestions for improvement"
+  ],
+  "pass_threshold": true,
+  "ready_for_publication": true
+}
+
+Scoring Guide:
+- 0.90-1.00: Excellent (A) - Ready for immediate use
+- 0.80-0.89: Good (B) - Minor improvements recommended
+- 0.70-0.79: Fair (C) - Moderate improvements needed
+- 0.60-0.69: Poor (D) - Major improvements required
+- 0.00-0.59: Fail (F) - Needs complete revision
+
+Overall score is weighted average:
+- Accuracy: 30%
+- Clarity: 25%
+- Educational Value: 20%
+- Difficulty Appropriateness: 15%
+- Option Quality: 5% (N/A for non-MC)
+- Explanation Quality: 5%
+
+Pass Threshold: overall_score >= {min_quality_score}
+
+CRITICAL: Return ONLY valid JSON, no additional text or formatting.
