@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg14
+    container_name: ailearn-postgres
+    environment:
+      POSTGRES_DB: ailearn_mate
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgresql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ailearn_mate"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - ailearn-network
+
+  mongodb:
+    image: mongo:6
+    container_name: ailearn-mongo
+    environment:
+      MONGO_INITDB_DATABASE: ailearn_mate
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - ailearn-network
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: ailearn-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - ailearn-network
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ailearn-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ailearn.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - ailearn-network
+    profiles:
+      - tools
+
+  # Optional: Mongo Express for MongoDB management
+  mongo-express:
+    image: mongo-express:latest
+    container_name: ailearn-mongo-express
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER:-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:-admin}
+    ports:
+      - "${MONGO_EXPRESS_PORT:-8081}:8081"
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - ailearn-network
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  mongo_data:
+    driver: local
+  mongo_config:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  ailearn-network:
+    driver: bridge
+
+# Usage:
+# 
+# Start core services (PostgreSQL + MongoDB):
+#   docker-compose up -d
+#
+# Start with management tools (pgAdmin + Mongo Express):
+#   docker-compose --profile tools up -d
+#
+# View logs:
+#   docker-compose logs -f
+#
+# Stop services:
+#   docker-compose down
+#
+# Stop and remove data:
+#   docker-compose down -v
+#
+# Access services:
+#   PostgreSQL: localhost:5432
+#   MongoDB: localhost:27017
+#   Redis: localhost:6379
+#   pgAdmin: http://localhost:5050
+#   Mongo Express: http://localhost:8081
